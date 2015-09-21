@@ -1265,6 +1265,56 @@ class InboundShipments(MWS):
         ))
         return self.make_request(data, method="POST")
     
+    
+    def update_inbound_shipment(self, shipment_id, shipment_name,
+                                destination, *args, shipment_status='',
+                                label_preference='', from_address={},
+                                case_required=False):
+        """
+        Updates an existing inbound shipment in Amazon FBA.
+        'from_address' is required. Call 'set_ship_from_address' first before
+        using this operation.
+        """
+        assert isinstance(shipment_id, str), "`shipment_id` must be a string."
+        assert isinstance(shipment_name, str), "`shipment_name` must be a string."
+        assert isinstance(destination, str), "`destination` must be a string."
+        
+        if args:
+            items = self._parse_item_args(args, 'UpdateInboundShipment')
+        else:
+            items = None
+        
+        from_address = self._parse_from_address(from_address)
+        
+        if shipment_status not in self.SHIPMENT_STATUSES:
+            # Status is an invalid choice.
+            # Remove it from this request by setting it to None.
+            shipment_status = None
+        
+        if label_preference not in self.LABEL_PREFERENCES:
+            # Label preference is an invalid choice.
+            # Remove it from this request by setting it to None.
+            label_preference = None
+        
+        case_required = 'true' if case_required else 'false'
+        
+        data = {
+            'Action': 'UpdateInboundShipment',
+            'ShipmentId': shipment_id,
+            'InboundShipmentHeader.ShipmentName': shipment_name,
+            'InboundShipmentHeader.DestinationFulfillmentCenterId': destination,
+            'InboundShipmentHeader.LabelPrepPreference': label_preference,
+            'InboundShipmentHeader.AreCasesRequired': case_required,
+            'InboundShipmentHeader.ShipmentStatus': shipment_status,
+        }
+        data.update(from_address)
+        if items:
+            data.update(self.enumerate_keyed_param(
+                'InboundShipmentItems.member', items,
+            ))
+        return self.make_request(data, method="POST")
+    
+    
     def get_prep_instructions_for_sku(self, skus=[], country_code=None):
         """
         Returns labeling requirements and item preparation instructions
