@@ -114,6 +114,21 @@ class DictWrapper(object):
             list(self._mydict.keys())[0],
             self._mydict
         )
+        
+        # Pull out list of "invalid_items" as a list of dicts.
+        # (this gets sent as a flat string, so we need to parse it)
+        self.invalid_items = None
+        if self.is_error():
+            error_message = self._response_dict.Error.Message
+            invalid_pattern = re.compile(r'InvalidItems\[\s*(.*)\]')
+            dict_pattern = re.compile(r'(\S+)=(".*?"|\S+)')
+            
+            match = invalid_pattern.search(error_message)
+            match = match.groups()[0]
+            split_matches = match.strip('()').split('), (')
+            
+            results = [dict(dict_pattern.findall(x)) for x in split_matches]
+            self.invalid_items = results or None
     
     
     @property
@@ -141,6 +156,9 @@ class DictWrapper(object):
     
     @property
     def error(self):
+        """
+        Return the Error element in the response, if it exists.
+        """
         if 'Error' in self._response_dict:
             return self._response_dict.Error
         return None
@@ -1068,6 +1086,9 @@ class InboundShipments(MWS):
         Once verified against the KEY_CONFIG, saves a parsed version
         of that dictionary, ready to send to requests.
         """
+        # Clear existing
+        self.from_address = None
+        
         if not address:
             raise MWSError('Missing required `address` dict.')
         if not isinstance(address, dict):
@@ -1230,7 +1251,7 @@ class InboundShipments(MWS):
         
         if not self.from_address:
             raise MWSError((
-                "InboundShipmentHeader.ShipFromAddress has not been set. "
+                "ShipFromAddress has not been set. "
                 "Please use `.set_ship_from_address()` first."
             ))
         from_address = self.from_address
@@ -1268,31 +1289,42 @@ class InboundShipments(MWS):
     
     def update_inbound_shipment(self, shipment_id, shipment_name,
                                 destination, *args, shipment_status='',
-                                label_preference='', from_address={},
+                                label_preference='',
                                 case_required=False):
         """
         Updates an existing inbound shipment in Amazon FBA.
         'from_address' is required. Call 'set_ship_from_address' first before
         using this operation.
         """
+        # Assert these are strings, error out if not.
         assert isinstance(shipment_id, str), "`shipment_id` must be a string."
         assert isinstance(shipment_name, str), "`shipment_name` must be a string."
         assert isinstance(destination, str), "`destination` must be a string."
         
+        # Parse item args
         if args:
             items = self._parse_item_args(args, 'UpdateInboundShipment')
         else:
             items = None
         
-        from_address = self._parse_from_address(from_address)
+        # Raise exception if no from_address has been set prior to calling
+        if not self.from_address:
+            raise MWSError((
+                "ShipFromAddress has not been set. "
+                "Please use `.set_ship_from_address()` first."
+            ))
+        # Assemble the from_address using operation-specific header
+        from_address = self.from_address
+        from_address = {'InboundShipmentHeader.{}'.format(k): v
+                        for k, v in from_address.items()}
         
         if shipment_status not in self.SHIPMENT_STATUSES:
-            # Status is an invalid choice.
+            # Passed shipment status is an invalid choice.
             # Remove it from this request by setting it to None.
             shipment_status = None
         
         if label_preference not in self.LABEL_PREFERENCES:
-            # Label preference is an invalid choice.
+            # Passed label preference is an invalid choice.
             # Remove it from this request by setting it to None.
             label_preference = None
         
@@ -1309,6 +1341,7 @@ class InboundShipments(MWS):
         }
         data.update(from_address)
         if items:
+            # Update with an items paramater only if they exist.
             data.update(self.enumerate_keyed_param(
                 'InboundShipmentItems.member', items,
             ))
