@@ -127,7 +127,12 @@ class DictWrapper(object):
             match = match.groups()[0]
             split_matches = match.strip('()').split('), (')
             
-            results = [dict(dict_pattern.findall(x)) for x in split_matches]
+            results = []
+            for x in split_matches:
+                result = dict(dict_pattern.findall(x))
+                result = {k: v.rstrip(',') for k, v in result.items()}
+                results.append(result)
+            
             self.invalid_items = results or None
     
     
@@ -961,6 +966,23 @@ class Products(MWS):
         data.update(self.enumerate_params({
             'ASINList.ASIN.': asins,
         }))
+        return self.make_request(data)
+    
+    
+    def get_lowest_priced_offers_for_sku(self, marketplaceid, sku, condition="New", excludeme="False"):
+        data = dict(Action='GetLowestPricedOffersForSKU',
+                    MarketplaceId=marketplaceid,
+                    SellerSKU=sku,
+                    ItemCondition=condition,
+                    ExcludeMe=excludeme)
+        return self.make_request(data)
+
+    def get_lowest_priced_offers_for_asin(self, marketplaceid, asin, condition="New", excludeme="False"):
+        data = dict(Action='GetLowestPricedOffersForASIN',
+                    MarketplaceId=marketplaceid,
+                    ASIN=asin,
+                    ItemCondition=condition,
+                    ExcludeMe=excludeme)
         return self.make_request(data)
     
     
