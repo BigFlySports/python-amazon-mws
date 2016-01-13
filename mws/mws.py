@@ -127,7 +127,12 @@ class DictWrapper(object):
             match = match.groups()[0]
             split_matches = match.strip('()').split('), (')
             
-            results = [dict(dict_pattern.findall(x)) for x in split_matches]
+            results = []
+            for x in split_matches:
+                result = dict(dict_pattern.findall(x))
+                result = {k: v.rstrip(',') for k, v in result.items()}
+                results.append(result)
+            
             self.invalid_items = results or None
     
     
