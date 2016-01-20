@@ -124,16 +124,17 @@ class DictWrapper(object):
             dict_pattern = re.compile(r'(\S+)=(".*?"|\S+)')
             
             match = invalid_pattern.search(error_message)
-            match = match.groups()[0]
-            split_matches = match.strip('()').split('), (')
-            
-            results = []
-            for x in split_matches:
-                result = dict(dict_pattern.findall(x))
-                result = {k: v.rstrip(',') for k, v in result.items()}
-                results.append(result)
-            
-            self.invalid_items = results or None
+            if match:
+                match = match.groups()[0]
+                split_matches = match.strip('()').split('), (')
+                
+                results = []
+                for x in split_matches:
+                    result = dict(dict_pattern.findall(x))
+                    result = {k: v.rstrip(',') for k, v in result.items()}
+                    results.append(result)
+                
+                self.invalid_items = results or None
     
     
     @property
