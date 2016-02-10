@@ -177,7 +177,8 @@ class DictWrapper(object):
     def is_throttled(self):
         if not self.is_error():
             return False
-        code = self.error.Code
+        code = self.error.get('Code', None)
+        code = code['value'] if code else None
         return code == 'RequestThrottled'
 
 
