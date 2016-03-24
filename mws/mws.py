@@ -119,11 +119,14 @@ class DictWrapper(object):
         # (this gets sent as a flat string, so we need to parse it)
         self.invalid_items = None
         if self.is_error():
-            error_message = self._response_dict.Error.Message
+            message = self._response_dict.Error.get('Message', '')
+            if message:
+                message = message['value']
+            
             invalid_pattern = re.compile(r'InvalidItems\[\s*(.*)\]')
             dict_pattern = re.compile(r'(\S+)=(".*?"|\S+)')
             
-            match = invalid_pattern.search(error_message)
+            match = invalid_pattern.search(message)
             if match:
                 match = match.groups()[0]
                 split_matches = match.strip('()').split('), (')
