@@ -1570,13 +1570,13 @@ class Inventory(MWS):
         data.update(self.enumerate_params({
             'SellerSkus.member.': skus,
         }))
-        return self.make_request(data, "POST")
+        return self.make_request(data, method="POST")
     
     
     def list_inventory_supply_by_next_token(self, token):
         print(self.ACTION_BY_NEXT_TOKEN_DEPRECATION_WARNING)
         data = dict(Action='ListInventorySupplyByNextToken', NextToken=token)
-        return self.make_request(data, "POST")
+        return self.make_request(data, method="POST")
     
     
 class OutboundShipments(MWS):
