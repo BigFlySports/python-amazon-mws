@@ -1557,14 +1557,14 @@ class Inventory(MWS):
     ]
     
     
-    def list_inventory_supply(self, skus=(), datetime=None,
+    def list_inventory_supply(self, skus=(), start_time=None,
                               response_group='Basic'):
         """
         Returns information on available inventory
         """
     
         data = dict(Action='ListInventorySupply',
-                    QueryStartDateTime=datetime,
+                    QueryStartDateTime=start_time,
                     ResponseGroup=response_group,
                     )
         data.update(self.enumerate_params({
