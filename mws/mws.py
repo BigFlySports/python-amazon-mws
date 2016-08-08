@@ -135,7 +135,7 @@ class DictWrapper(object):
             if message:
                 message = message['value']
             
-            invalid_pattern = re.compile(r'InvalidItems\[\s*(.*)\]')
+            invalid_pattern = re.compile(r'InvalidItems\[\s*(.*)\]?')
             dict_pattern = re.compile(r'(\S+)=(".*?"|\S+)')
             
             match = invalid_pattern.search(message)
