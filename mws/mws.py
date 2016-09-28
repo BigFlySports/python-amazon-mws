@@ -189,6 +189,7 @@ class DictWrapper(object):
                 if code:
                     code = code['value']
                 error_dict['Message'] = code
+            return error_dict
         return None
     
     
