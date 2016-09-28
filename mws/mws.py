@@ -131,9 +131,11 @@ class DictWrapper(object):
         # (this gets sent as a flat string, so we need to parse it)
         self.invalid_items = None
         if self.is_error():
-            message = self._response_dict.Error.get('Message', '')
-            if message:
-                message = message['value']
+            message = ''
+            if 'Error' in self._response_dict:
+                message = self._response_dict.Error.get('Message', '')
+                if message:
+                    message = message['value']
             
             invalid_pattern = re.compile(r'InvalidItems\[\s*([^\]]*)\]?')
             dict_pattern = re.compile(r'(\S+)=(".*?"|\S+)')
@@ -181,7 +183,12 @@ class DictWrapper(object):
         Return the Error element in the response, if it exists.
         """
         if 'Error' in self._response_dict:
-            return self._response_dict.Error
+            error_dict = self._response_dict.Error
+            if 'Message' not in error_dict:
+                code = error_dict.get('Code', '')
+                if code:
+                    code = code['value']
+                error_dict['Message'] = code
         return None
     
     
