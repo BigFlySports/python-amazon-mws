@@ -185,10 +185,7 @@ class DictWrapper(object):
         if 'Error' in self._response_dict:
             error_dict = self._response_dict.Error
             if 'Message' not in error_dict:
-                code = error_dict.get('Code', '')
-                if code:
-                    code = code['value']
-                error_dict['Message'] = code
+                error_dict['Message'] = error_dict.get('Code')
             return error_dict
         return None
     
