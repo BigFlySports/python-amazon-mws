@@ -1281,7 +1281,8 @@ class InboundShipments(MWS):
 
     def create_inbound_shipment(self, shipment_id, shipment_name,
                                 destination, *args, shipment_status='',
-                                label_preference='', case_required=False):
+                                label_preference='', case_required=False,
+                                box_contents_source=None):
         """
         Creates an inbound shipment to Amazon's fulfillment network.
 
@@ -1332,6 +1333,7 @@ class InboundShipments(MWS):
             'InboundShipmentHeader.LabelPrepPreference': label_preference,
             'InboundShipmentHeader.AreCasesRequired': case_required,
             'InboundShipmentHeader.ShipmentStatus': shipment_status,
+            'InboundShipmentHeader.IntendedBoxContentsSource': box_contents_source,
         }
         data.update(from_address)
         data.update(self.enumerate_keyed_param(
@@ -1342,8 +1344,8 @@ class InboundShipments(MWS):
 
     def update_inbound_shipment(self, shipment_id, shipment_name,
                                 destination, *args, shipment_status='',
-                                label_preference='',
-                                case_required=False):
+                                label_preference='', case_required=False,
+                                box_contents_source=None):
         """
         Updates an existing inbound shipment in Amazon FBA.
         'from_address' is required. Call 'set_ship_from_address' first before
@@ -1391,6 +1393,7 @@ class InboundShipments(MWS):
             'InboundShipmentHeader.LabelPrepPreference': label_preference,
             'InboundShipmentHeader.AreCasesRequired': case_required,
             'InboundShipmentHeader.ShipmentStatus': shipment_status,
+            'InboundShipmentHeader.IntendedBoxContentsSource': box_contents_source,
         }
         data.update(from_address)
         if items:
