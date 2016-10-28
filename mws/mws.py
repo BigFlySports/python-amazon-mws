@@ -1240,7 +1240,7 @@ class InboundShipments(MWS):
         return items
 
 
-    def create_inbound_shipment_plan(self, *args, country_code='US',
+    def create_inbound_shipment_plan(self, items, country_code='US',
                                      subdivision_code='', label_preference=''):
         """
         Returns one or more inbound shipment plans, which provide the
@@ -1254,12 +1254,12 @@ class InboundShipments(MWS):
         'from_address' is required. Call 'set_ship_from_address' first before
         using this operation.
         """
-        if not args:
+        if not items:
             raise MWSError("One or more `item` dict arguments required.")
         subdivision_code = subdivision_code or None
         label_preference = label_preference or None
 
-        items = self._parse_item_args(args, 'CreateInboundShipmentPlan')
+        items = self._parse_item_args(items, 'CreateInboundShipmentPlan')
         if not self.from_address:
             raise MWSError((
                 "ShipFromAddress has not been set. "
@@ -1280,13 +1280,13 @@ class InboundShipments(MWS):
 
 
     def create_inbound_shipment(self, shipment_id, shipment_name,
-                                destination, *args, shipment_status='',
+                                destination, items, shipment_status='',
                                 label_preference='', case_required=False,
                                 box_contents_source=None):
         """
         Creates an inbound shipment to Amazon's fulfillment network.
 
-        At least one dictionary must be passed as `args`. Each dictionary
+        At least one dictionary must be passed as `items`. Each dictionary
         should contain the following keys:
           REQUIRED: 'sku', 'quantity'
           OPTIONAL: 'quantity_in_case'
@@ -1298,10 +1298,10 @@ class InboundShipments(MWS):
         assert isinstance(shipment_name, str), "`shipment_name` must be a string."
         assert isinstance(destination, str), "`destination` must be a string."
 
-        if not args:
+        if not items:
             raise MWSError("One or more `item` dict arguments required.")
 
-        items = self._parse_item_args(args, 'CreateInboundShipment')
+        items = self._parse_item_args(items, 'CreateInboundShipment')
 
         if not self.from_address:
             raise MWSError((
@@ -1343,7 +1343,7 @@ class InboundShipments(MWS):
 
 
     def update_inbound_shipment(self, shipment_id, shipment_name,
-                                destination, *args, shipment_status='',
+                                destination, items=None, shipment_status='',
                                 label_preference='', case_required=False,
                                 box_contents_source=None):
         """
@@ -1357,8 +1357,8 @@ class InboundShipments(MWS):
         assert isinstance(destination, str), "`destination` must be a string."
 
         # Parse item args
-        if args:
-            items = self._parse_item_args(args, 'UpdateInboundShipment')
+        if items:
+            items = self._parse_item_args(items, 'UpdateInboundShipment')
         else:
             items = None
 
