@@ -143,18 +143,18 @@ class DictWrapper(object):
                 if message:
                     message = message['value']
 
-            invalid_pattern = re.compile(r'InvalidItems\[\s*([^\]]*)\]?')
-            dict_pattern = re.compile(r'(\S+)=(".*?"|\S+)')
+            invalid_pattern = re.compile(r'(?<=InvalidItems\[)\s?(.*?)(?=\]\.)')
+
+            dict_pattern = re.compile(r'(skuType|sku|reason)=(.*?),?\s?(?=skuType|sku|reason|$)')
 
             match = invalid_pattern.search(message)
             if match:
-                match = match.groups()[0]
-                split_matches = match.strip('()').split('), (')
+                item_lines = match.group().strip('() ').split('), (')
 
                 results = []
-                for match in split_matches:
-                    result = dict(dict_pattern.findall(match))
-                    result = {k: v.rstrip(',') for k, v in result.items()}
+                for line in item_lines:
+                    result = dict(dict_pattern.findall(line))
+                    result = {k: v for k, v in result.items()}
                     results.append(result)
 
                 self.invalid_items = results or None
